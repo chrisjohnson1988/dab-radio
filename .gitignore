@@ -1,0 +1,6 @@
+# Ignore outputs
+*.m3u
+*.o
+dab_scan
+dab_mp2
+dab_aac
