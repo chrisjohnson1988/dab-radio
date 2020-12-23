@@ -14,7 +14,8 @@ public:
         std::string ensemble_name, 
         std::string service_name, 
         uint8_t subchannel, 
-        bool dab_plus
+        bool dab_plus,
+        uint16_t bitrate
     ) {}
 };
 

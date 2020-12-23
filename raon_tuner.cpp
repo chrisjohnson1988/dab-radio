@@ -33,31 +33,24 @@ RaonTunerInput::RaonTunerInput() {
         throw std::runtime_error("Init Error");
 	}
 
-	m_usbDevice = libusb_open_device_with_vid_pid(m_usbCtx, 0x16c0, 0x05dc); //these are vendorID and productID I found for my usb device
+	m_usbDevice = libusb_open_device_with_vid_pid(m_usbCtx, 0x16c0, 0x05dc);
 	if(m_usbDevice == NULL)
         throw std::runtime_error("Cannot open tuner");
 
-	// if(libusb_kernel_driver_active(m_usbDevice, 0) == 1) { //find out if kernel driver is attached
-	// 	std::cout<<"Kernel Driver Active"<<std::endl;
-	// 	if(libusb_detach_kernel_driver(m_usbDevice, 0) == 0) //detach it
-	// 		std::cout<<"Kernel Driver Detached!"<<std::endl;
-	// }
-	result = libusb_claim_interface(m_usbDevice, 0); //claim interface 0 (the first) of device (mine had jsut 1)
+	result = libusb_claim_interface(m_usbDevice, 0);
 	if(result < 0) {
         throw std::runtime_error("Cannot claim interface");
 	}
 }
 
 RaonTunerInput::~RaonTunerInput() {
-    std::cout << LOG_TAG << "Destroying Tuner" << std::endl;
-	
 	libusb_release_interface(m_usbDevice, 0); //release the claimed interface
 	libusb_close(m_usbDevice); //close the device we opened
 	libusb_exit(m_usbCtx); //needs to be called to end the
 }
 
 void RaonTunerInput::initialize() {
-    std::cout << LOG_TAG << "Powering up" << std::endl;
+    std::cerr << LOG_TAG << "Powering up" << std::endl;
     if(tunerPowerUp()) {
         configurePowerType();
         configureAddClock();
@@ -77,12 +70,12 @@ void RaonTunerInput::initialize() {
 
         setupMscThreshold();
         setupMemoryFIC();
-        std::cout << LOG_TAG << "Initialized" << std::endl;
+        std::cerr << LOG_TAG << "Initialized" << std::endl;
     }
 }
 
 void RaonTunerInput::tuneFrequency(uint32_t frequencyKhz) {
-    std::cout << LOG_TAG << "Tuning Frequency: " << +frequencyKhz << std::endl;
+    std::cerr << LOG_TAG << "Tuning Frequency: " << +frequencyKhz << std::endl;
     setFrequency(frequencyKhz);
 }
 
@@ -94,12 +87,12 @@ bool RaonTunerInput::tunerPowerUp() {
         switchPage(REGISTER_PAGE_HOST);
         setRegister(0x7D, 0x06);
         if(readRegister(0x7D) == 0x06) {
-            std::cout << LOG_TAG << "PowerUp okay!" << std::endl;
+            std::cerr << LOG_TAG << "PowerUp okay!" << std::endl;
             return true;
         }
     }
 
-    std::cout << LOG_TAG << "PowerUp failed!" << std::endl;
+    std::cerr << LOG_TAG << "PowerUp failed!" << std::endl;
     return false;
 }
 
@@ -172,7 +165,7 @@ void RaonTunerInput::configureAddClock() {
         if(RD15 > 0) {
             break;
         } else {
-            std::cout << LOG_TAG << " ADCClock SYNTH 1st step  UnLock..." << std::endl;
+            std::cerr << LOG_TAG << " ADCClock SYNTH 1st step  UnLock..." << std::endl;
         }
     }
 }
@@ -687,7 +680,7 @@ void RaonTunerInput::setFrequency(uint32_t frequencyKhz) {
 }
 
 void RaonTunerInput::setupMemoryFIC() {
-    std::cout << LOG_TAG << "Setting up FIC Memory..." << std::endl;
+    std::cerr << LOG_TAG << "Setting up FIC Memory..." << std::endl;
 
     switchPage(REGISTER_PAGE_DD);
 
@@ -698,7 +691,7 @@ void RaonTunerInput::setupMemoryFIC() {
 }
 
 void RaonTunerInput::setupMscThreshold() {
-    std::cout << LOG_TAG << "Setting up MSC Threshold..." << std::endl;
+    std::cerr << LOG_TAG << "Setting up MSC Threshold..." << std::endl;
 
     switchPage(REGISTER_PAGE_DD);
 
@@ -718,7 +711,7 @@ void RaonTunerInput::setupMscThreshold() {
 }
 
 void RaonTunerInput::softReset() {
-    std::cout << LOG_TAG << "SoftReset..." << std::endl;
+    std::cerr << LOG_TAG << "SoftReset..." << std::endl;
     switchPage(REGISTER_PAGE_FM);
 
     setRegister(0x10, 0x48);
@@ -758,8 +751,8 @@ void RaonTunerInput::readData() {
         /* FIC interrupt status clear */
         setRegister(INT_E_UCLRL, 0x01);
 
-        //std::cout << LOG_TAG << "FicData Hdr: " << +reFicRet.size() << " : " << +bytesTransfered  << " : " << std::hex << std::setfill('0') << std::setw(2) << +reFicRet[0] << +reFicRet[1] << +reFicRet[2] << +reFicRet[3] << std::dec << std::endl;
-        //std::cout << LOG_TAG << "FicData: " << std::hex << std::setfill('0') << std::setw(2) << +reFicRet[5] << +reFicRet[6] << +reFicRet[7] << +reFicRet[8] << std::dec << std::endl;
+        //std::cerr << LOG_TAG << "FicData Hdr: " << +reFicRet.size() << " : " << +bytesTransfered  << " : " << std::hex << std::setfill('0') << std::setw(2) << +reFicRet[0] << +reFicRet[1] << +reFicRet[2] << +reFicRet[3] << std::dec << std::endl;
+        //std::cerr << LOG_TAG << "FicData: " << std::hex << std::setfill('0') << std::setw(2) << +reFicRet[5] << +reFicRet[6] << +reFicRet[7] << +reFicRet[8] << std::dec << std::endl;
 
         if(m_fic_observer) {
             m_fic_observer->ficData(&reFicRet[4], bytesTransfered-4);
@@ -768,19 +761,19 @@ void RaonTunerInput::readData() {
         //     try {
         //         // dataInput(std::vector<uint8_t>(reFicRet.begin() + 4 + i * 32, reFicRet.begin() + 4 + i * 32 + 32), 0x64, false);
         //     } catch(std::length_error& lenErr) {
-        //         std::cout << LOG_TAG << "Length error..." << std::endl;
+        //         std::cerr << LOG_TAG << "Length error..." << std::endl;
         //     }
         // }
     }
 
     if(msc1Overrun || msc1Underrun) {
-        // std::cout << LOG_TAG << "Clearing MSC memory for OverUnderRun, MSC0Int" << +msc0Int << ", MSC0Overrun: " << +msc0Overrun << ", MSC0Underrun: " << +msc0Underrun << std::endl;
+        // std::cerr << LOG_TAG << "Clearing MSC memory for OverUnderRun, MSC0Int" << +msc0Int << ", MSC0Overrun: " << +msc0Overrun << ", MSC0Underrun: " << +msc0Underrun << std::endl;
         clearAndSetupMscMemory();
         return;
     }
 
     if(msc1Int) {
-        //std::cout << LOG_TAG << "Reading MSC memory" << std::endl;
+        //std::cerr << LOG_TAG << "Reading MSC memory" << std::endl;
 
         switchPage(REGISTER_PAGE_MSC1);
 
@@ -800,13 +793,13 @@ void RaonTunerInput::readData() {
         int bytesTransfered = bulkTransferData(RAON_ENDPOINT_OUT, mscReqBuf);
         bytesTransfered = bulkTransferData(RAON_ENDPOINT_IN, mscRecBuff);
 
-        //std::cout << LOG_TAG << "ReadData: " << +bytesTransfered << std::endl;
+        //std::cerr << LOG_TAG << "ReadData: " << +bytesTransfered << std::endl;
         if(m_msc_observer && bytesTransfered >= 4) {  
         //if(m_startServiceLink != nullptr && bytesTransfered >= 4) {
             // audio->componentMscDataInput(std::vector<uint8_t>(mscRecBuff.begin()+4, mscRecBuff.begin()+bytesTransfered), false);
             m_msc_observer->mscData(std::vector<uint8_t>(mscRecBuff.begin()+4, mscRecBuff.begin()+bytesTransfered));
         } else {
-            std::cout << LOG_TAG << "StartServiceLink is null" << std::endl;
+            std::cerr << LOG_TAG << "StartServiceLink is null" << std::endl;
         }
 
         //clear buffer
@@ -815,14 +808,14 @@ void RaonTunerInput::readData() {
 
         return;
     } else {
-        //std::cout << LOG_TAG << "MSC1 not ready ####" << std::endl;
+        //std::cerr << LOG_TAG << "MSC1 not ready ####" << std::endl;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 }
 
 void RaonTunerInput::openSubChannel(uint8_t subchanId) {
-    std::cout << LOG_TAG << "Opening subchannel: " << std::hex << +subchanId << std::dec << std::endl;
+    std::cerr << LOG_TAG << "Opening subchannel: " << std::hex << +subchanId << std::dec << std::endl;
 
     switchPage(REGISTER_PAGE_DD);
 
@@ -852,7 +845,7 @@ uint8_t RaonTunerInput::getLockStatus() {
         lockSt |= RTV_DAB_FEC_LOCK_MASK;
     }
 
-    std::cout << LOG_TAG << "LockState at: " << +m_currentFrequency << " : " << +lockSt << std::endl;
+    std::cerr << LOG_TAG << "LockState at: " << +m_currentFrequency << " : " << +lockSt << std::endl;
 
     return lockSt;
 }

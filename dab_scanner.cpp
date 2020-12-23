@@ -39,7 +39,8 @@ void DabScanner::startFrequencyScan() {
                 m_ensemble_label, 
                 FICDecoder::ConvertLabelToUTF8(x.second.label, nullptr), 
                 x.second.audio_service.subchid, 
-                x.second.audio_service.dab_plus
+                x.second.audio_service.dab_plus,
+                x.second.subchannel.bitrate
             );
         }
     }

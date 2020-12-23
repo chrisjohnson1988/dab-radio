@@ -1,0 +1,2 @@
+#!/bin/sh
+/opt/dab-radio/dab_$5 $3 $4 $6 | /usr/bin/ffmpeg -loglevel fatal -re -i - -acodec copy -f mpegts -metadata service_name="$1" -metadata service_provider="$2" -mpegts_service_type digital_radio pipe:1

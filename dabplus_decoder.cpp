@@ -29,18 +29,9 @@ extern "C" {
 #include "tools.h"
 
 DabPlusServiceComponentDecoder::DabPlusServiceComponentDecoder() {
-    // m_processThreadRunning = true;
-    // m_processThread = std::thread(&DabPlusServiceComponentDecoder::processData, this);
 }
 
 DabPlusServiceComponentDecoder::~DabPlusServiceComponentDecoder() {
-    std::cout << m_logTag << " Deconstructing" << std::endl;
-
-    // m_processThreadRunning = false;
-    // if(m_processThread.joinable()) {
-    //     m_processThread.join();
-    // }
-    //m_conQueue.clear();
 }
 
 void DabPlusServiceComponentDecoder::setSubchannelBitrate(uint16_t bitrate) {
@@ -194,7 +185,7 @@ void DabPlusServiceComponentDecoder::processData(const std::vector<uint8_t>& fra
                         }
                         default:
                             //Though shall not pass
-                            std::cout << m_logTag << " Bad NumAUs: " << +m_currentSuperFrame.numAUs << std::endl;
+                            // std::cout << m_logTag << " Bad NumAUs: " << +m_currentSuperFrame.numAUs << std::endl;
                             break;
                     }
 
@@ -217,9 +208,9 @@ void DabPlusServiceComponentDecoder::processData(const std::vector<uint8_t>& fra
 
                         //AU start sanity checks
                         if(auStart > m_superFrameSize || auStart <= m_currentSuperFrame.auStarts[i-1]) {
-                            std::cout << m_logTag << " Bad AU-Start NumAUs " << +m_currentSuperFrame.numAUs << " : " << +i << std::endl;
-                            std::cout << m_logTag << " Bad AU-Start: " << +auStart << " : " << +m_superFrameSize << std::endl;
-                            std::cout << m_logTag << " Bad AU-Start: " << +auStart << " : " << +m_currentSuperFrame.auStarts[i-1] << std::endl;
+                            // std::cout << m_logTag << " Bad AU-Start NumAUs " << +m_currentSuperFrame.numAUs << " : " << +i << std::endl;
+                            // std::cout << m_logTag << " Bad AU-Start: " << +auStart << " : " << +m_superFrameSize << std::endl;
+                            // std::cout << m_logTag << " Bad AU-Start: " << +auStart << " : " << +m_currentSuperFrame.auStarts[i-1] << std::endl;
                             badAuStart = true;
                             break;
                         }
@@ -249,7 +240,7 @@ void DabPlusServiceComponentDecoder::processData(const std::vector<uint8_t>& fra
             }
 
             if(m_dabSuperFrameCount > 5) {
-                std::cout << m_logTag << " SuperFrame damaged #########################" << std::endl;
+                // std::cout << m_logTag << " SuperFrame damaged #########################" << std::endl;
                 m_isSync = false;
                 m_dabSuperFrameCount = 0;
             }
@@ -291,40 +282,8 @@ void DabPlusServiceComponentDecoder::processData(const std::vector<uint8_t>& fra
 
                                 auBuff.insert(auBuff.end(), m_currentSuperFrame.superFrameData.begin()+m_currentSuperFrame.auStarts[i], m_currentSuperFrame.superFrameData.begin() + m_currentSuperFrame.auStarts[i] + m_currentSuperFrame.auLengths[i] - 2); // -2 of length to cut off CRC
 
-                                // uint8_t header[7];
-                                // header[2] = 0;
-                                // header[3] = 0;
-                                // header[4] = 0;
-                                // header[5] = 0;
-                                // header[6] = 0;
-                                
-                                // uint16_t length = m_currentSuperFrame.auLengths[i] - 2 + 7;
-                                // header[0] = 0xFF;
-                                // header[1] = 0xF0;
-                                // header[2] = ((1-1)<<6) + (5<<2) + (1>>2);
-                                // header[3] = ((1&3)<<6) + (length > 11);
-                                // header[4] = (length&0x7FF >> 3);
-                                // header[5] = ((length&7)<<5) + 0x1F;
-                                // header[6] = 0xFC;
-                                // // header[1] |= 1;
-                                // // header[2] |= (1 << 6); // AAC_HE-V2
-                                // // header[2] |= ((5 & 0xf) << 2); // 32khz
-                                // // header[3] |= ( 1 << 6); // Mono
-                                // // header[3] |= ((length + 7) >> 11) & 0x03;
-                                // // header[4] = ((length + 7) >> 3) & 0xFF;
-                                // // header[5] |= ((length + 7) & 7) << 5;
-                                // // header[6] = 0xFC;
-
-                                // // std::cout << std::hex << +header[0] << +header[1]<< +header[2]<< +header[3]<< +header[4]<< +header[5]<< +header[6] << std::dec <<std::endl;
-                                //std::cout << " Channels " << m_currentSuperFrame.channels << " rate " << m_currentSuperFrame.samplingRate << " SBR " << m_currentSuperFrame.sbrUsed << " PS " << m_currentSuperFrame.psUsed << std::endl;
-                                // // std::cout << auBuff.size() << " " << length << std::endl;
-                                // // for (auto i: header)
-                                // //     std::cout << i; 
-                                    
                                 ProcessUntouchedStream(&auBuff[0], auBuff.size());
                                 
-                            } else {
-                                std::cout << m_logTag << " SuperFrame AU[" << +i << "] CRC failed, Bitrate: " << std::endl;
                             }
                         }
 
@@ -475,9 +434,5 @@ void DabPlusServiceComponentDecoder::RSDecoder::DecodeSuperframe(uint8_t* sf, si
 
             sf[pos * subch_index + i] = rs_packet[pos];
         }
-    }
-
-    if(total_corr_count || uncorr_errors) {
-        std::cout << "[RSDecoder] TotalCorrCount: " << +total_corr_count << " UncorrErr: " << +uncorr_errors << std::endl;
     }
 }
